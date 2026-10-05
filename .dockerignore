@@ -1,0 +1,6 @@
+target/
+.git/
+.mvn/
+*.db
+*.db-journal
+*.log
