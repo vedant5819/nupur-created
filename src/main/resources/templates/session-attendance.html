@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Attendance Records - QR Attendance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; padding: 24px; }
+        .navbar { max-width: 900px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 16px 24px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .navbar h1 { font-size: 20px; font-weight: 700; color: #0f172a; }
+        .btn { display: inline-block; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #ffffff; background-color: #2563eb; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; transition: background-color 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 8px; }
+        .meta-item label { display: block; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        .meta-item span { font-size: 15px; font-weight: 600; color: #0f172a; }
+        .badge-active { display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+        .badge-closed { display: inline-block; background-color: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 14px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+        th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; }
+        tr:hover { background-color: #f8fafc; }
+        .badge-present { display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+        .empty-text { color: #64748b; font-style: italic; font-size: 14px; text-align: center; padding: 24px 0; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Session Attendance Report</h1>
+        <a th:href="@{/teacher}" class="btn">Back to Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+        <!-- Session Details -->
+        <div class="card" th:if="${attendanceSession}">
+            <h2>Lecture Details</h2>
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <label>Lecture Name</label>
+                    <span th:text="${attendanceSession.sessionName}">Java Programming</span>
+                </div>
+                <div class="meta-item">
+                    <label>Session ID</label>
+                    <span th:text="'#' + ${attendanceSession.id}">#1</span>
+                </div>
+                <div class="meta-item">
+                    <label>Start Time</label>
+                    <span th:text="${#temporals.format(attendanceSession.startTime, 'dd MMM yyyy, hh:mm a')}">05 Oct, 09:30 AM</span>
+                </div>
+                <div class="meta-item">
+                    <label>Status</label>
+                    <span>
+                        <span th:if="${attendanceSession.active}" class="badge-active">Active</span>
+                        <span th:if="${!attendanceSession.active}" class="badge-closed">Closed</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Attended List -->
+        <div class="card">
+            <h2>Attended Students (<span th:text="${attendanceRecords != null ? #lists.size(attendanceRecords) : 0}">0</span>)</h2>
+
+            <div th:if="${attendanceRecords == null or #lists.isEmpty(attendanceRecords)}" class="empty-text">
+                No students have marked attendance for this session yet.
+            </div>
+
+            <table th:if="${attendanceRecords != null and not #lists.isEmpty(attendanceRecords)}">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student ID / Roll No</th>
+                        <th>Student Full Name</th>
+                        <th>Time Marked</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="record, iter : ${attendanceRecords}">
+                        <td th:text="${iter.count}">1</td>
+                        <td><strong th:text="${record.studentId}">2024CS101</strong></td>
+                        <td th:text="${record.studentName}">Rahul Sharma</td>
+                        <td th:text="${#temporals.format(record.attendanceTime, 'dd MMM yyyy, hh:mm:ss a')}">05 Oct 2026, 09:35:12 AM</td>
+                        <td><span class="badge-present">Present</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - QR Attendance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; padding: 24px; }
+        .navbar { max-width: 900px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 16px 24px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .navbar h1 { font-size: 20px; font-weight: 700; color: #0f172a; }
+        .btn-logout { background-color: #ef4444; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+        .btn-logout:hover { background-color: #dc2626; }
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .profile-item label { display: block; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        .profile-item span { font-size: 15px; font-weight: 600; color: #0f172a; }
+        .instruction-box { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 8px; padding: 20px; text-align: center; }
+        .instruction-box h3 { color: #1e40af; font-size: 16px; margin-bottom: 8px; }
+        .instruction-box p { color: #3b82f6; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+        th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; }
+        tr:hover { background-color: #f8fafc; }
+        .badge-present { display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; }
+        .empty-text { color: #64748b; font-style: italic; font-size: 14px; text-align: center; padding: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Student Portal</h1>
+        <form th:action="@{/logout}" method="post" style="margin: 0;">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <!-- Student Info Card -->
+        <div class="card" th:if="${student}">
+            <h2>Student Profile</h2>
+            <div class="profile-grid">
+                <div class="profile-item">
+                    <label>Full Name</label>
+                    <span th:text="${student.name}">Rahul Sharma</span>
+                </div>
+                <div class="profile-item">
+                    <label>Student ID</label>
+                    <span th:text="${student.studentId}">2024CS101</span>
+                </div>
+                <div class="profile-item">
+                    <label>Email</label>
+                    <span th:text="${student.email}">rahul@college.edu</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Instruction Box -->
+        <div class="card">
+            <div class="instruction-box">
+                <h3>QR Attendance Ready</h3>
+                <p>Scan the QR code displayed on the teacher's screen using your mobile camera or browser to automatically mark your attendance.</p>
+            </div>
+        </div>
+
+        <!-- Attendance History Card -->
+        <div class="card">
+            <h2>Your Attendance History</h2>
+            <div th:if="${attendances == null or #lists.isEmpty(attendances)}" class="empty-text">
+                No attendance records found yet. Scan lecture QR codes to start logging attendance.
+            </div>
+
+            <table th:if="${attendances != null and not #lists.isEmpty(attendances)}">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Lecture / Session</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="att, iter : ${attendances}">
+                        <td th:text="${iter.count}">1</td>
+                        <td>
+                            <strong th:text="${att.session != null ? att.session.sessionName : 'General Attendance'}">Java Lecture</strong>
+                            <span th:if="${att.session != null}" style="color: #64748b; font-size: 12px;" th:text="' (ID: #' + ${att.session.id} + ')'"></span>
+                        </td>
+                        <td th:text="${#temporals.format(att.attendanceTime, 'dd MMM yyyy, hh:mm a')}">05 Oct 2026, 09:30 AM</td>
+                        <td><span class="badge-present">Present</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

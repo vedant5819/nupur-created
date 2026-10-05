@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture QR Code - QR Attendance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #ffffff; width: 100%; max-width: 480px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); padding: 36px; border: 1px solid #e2e8f0; text-align: center; }
+        .card h1 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .session-name { font-size: 18px; font-weight: 600; color: #2563eb; margin-bottom: 20px; }
+        .qr-container { background: #ffffff; padding: 16px; border: 2px dashed #cbd5e1; border-radius: 12px; display: inline-block; margin-bottom: 20px; }
+        .qr-container img { width: 250px; height: 250px; display: block; }
+        .url-box { background: #f1f5f9; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #475569; word-break: break-all; margin-bottom: 24px; }
+        .url-box a { color: #2563eb; text-decoration: none; font-weight: 600; }
+        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 14px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; font-weight: 600; }
+        .btn { display: inline-block; width: 100%; padding: 12px; font-size: 14px; font-weight: 600; color: #ffffff; background-color: #2563eb; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; transition: background-color 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; margin-top: 10px; }
+        .btn-outline:hover { background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Scan to Mark Attendance</h1>
+
+        <div th:if="${attendanceSession}">
+            <p class="session-name" th:text="${attendanceSession.sessionName}">Java Programming</p>
+        </div>
+
+        <div th:if="${error}" class="alert-error" th:text="${error}">
+            This attendance session is closed.
+        </div>
+
+        <div th:if="${qrCodeImage}" class="qr-container">
+            <img th:src="${qrCodeImage}" alt="Attendance QR Code">
+        </div>
+
+        <div th:if="${attendanceUrl}" class="url-box">
+            Scan with camera or visit:<br>
+            <a th:href="${attendanceUrl}" th:text="${attendanceUrl}">http://localhost:8080/attendance/1</a>
+        </div>
+
+        <a th:href="@{/teacher}" class="btn">Back to Teacher Dashboard</a>
+        <a th:if="${attendanceSession}" th:href="@{/teacher/session/{id}/attendance(id=${attendanceSession.id})}" class="btn btn-outline">View Session Attendance</a>
+    </div>
+</body>
+</html>

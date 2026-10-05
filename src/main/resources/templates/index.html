@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Attendance System - Home</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 24px; }
+        .container { background: #ffffff; width: 100%; max-width: 580px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; padding: 40px; text-align: center; }
+        .badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        h1 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 10px; letter-spacing: -0.5px; }
+        p.desc { font-size: 15px; color: #64748b; line-height: 1.5; margin-bottom: 30px; }
+        .btn-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+        .btn { display: block; width: 100%; padding: 13px; font-size: 15px; font-weight: 600; text-decoration: none; border-radius: 8px; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-primary { background-color: #2563eb; color: #ffffff; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-outline { background-color: #ffffff; color: #2563eb; border: 1px solid #cbd5e1; }
+        .btn-outline:hover { background-color: #f8fafc; border-color: #94a3b8; }
+        .btn-danger { background-color: #ef4444; color: #ffffff; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .flow-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; text-align: left; font-size: 13px; color: #475569; }
+        .flow-card h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+        .flow-steps { margin-left: 18px; line-height: 1.6; }
+        .user-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: left; }
+        .user-box p { font-size: 13px; color: #166534; margin-bottom: 2px; }
+        .user-box strong { font-size: 16px; color: #14532d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="badge">College Mini Project</span>
+        <h1>QR Attendance System</h1>
+        <p class="desc">Fast, secure, and hassle-free classroom attendance using dynamic QR codes and student accounts.</p>
+
+        <!-- Authenticated State -->
+        <div th:if="${currentUser != null}">
+            <div class="user-box">
+                <p>Logged in as:</p>
+                <strong th:text="${currentUser.name}">Rahul Sharma</strong>
+                <span style="font-size: 13px; color: #15803d;" th:text="' (' + ${currentUser.role} + ')'"></span>
+            </div>
+
+            <div class="btn-group">
+                <a th:if="${currentUser.role == 'ROLE_STUDENT'}" th:href="@{/student}" class="btn btn-primary">Go to Student Dashboard</a>
+                <a th:if="${currentUser.role == 'ROLE_TEACHER'}" th:href="@{/teacher}" class="btn btn-primary">Go to Teacher Dashboard</a>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="btn btn-danger">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Unauthenticated State -->
+        <div th:if="${currentUser == null}" class="btn-group">
+            <a th:href="@{/login}" class="btn btn-primary">Sign In (Student / Teacher)</a>
+            <a th:href="@{/register}" class="btn btn-outline">Register as New Student</a>
+        </div>
+
+        <!-- Workflow Summary -->
+        <div class="flow-card">
+            <h3>How it works:</h3>
+            <ol class="flow-steps">
+                <li>Student registers and logs into their account.</li>
+                <li>Teacher starts a lecture session & displays the QR code.</li>
+                <li>Student scans the QR with their mobile camera / browser.</li>
+                <li>System automatically identifies student & marks attendance.</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - QR Attendance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #ffffff; width: 100%; max-width: 480px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); padding: 36px; border: 1px solid #e2e8f0; text-align: center; }
+        .card h1 { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .session-title { font-size: 18px; font-weight: 600; color: #2563eb; margin-bottom: 20px; }
+        .user-pill { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 24px; text-align: left; }
+        .user-pill p { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+        .user-pill strong { font-size: 15px; color: #0f172a; display: block; }
+        .alert { padding: 14px 18px; border-radius: 8px; font-size: 14px; margin-bottom: 24px; font-weight: 600; line-height: 1.4; text-align: center; }
+        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .btn { display: inline-block; width: 100%; padding: 14px; font-size: 16px; font-weight: 600; color: #ffffff; background-color: #2563eb; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; text-decoration: none; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #64748b; margin-top: 10px; }
+        .btn-secondary:hover { background-color: #475569; }
+        .actions { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-links { margin-top: 24px; font-size: 13px; color: #64748b; }
+        .nav-links a { color: #2563eb; text-decoration: none; font-weight: 600; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Lecture Attendance</h1>
+
+        <!-- Session Name Display -->
+        <p class="session-title" th:if="${attendanceSession}" th:text="${attendanceSession.sessionName}">Java Programming</p>
+        <p class="session-title" th:if="${attendanceSession == null}" style="color: #64748b;">Session Attendance</p>
+
+        <!-- Logged-in Student Identity Info -->
+        <div class="user-pill" th:if="${student}">
+            <p>Authenticated Student:</p>
+            <strong th:text="${student.name + ' (' + student.studentId + ')'}">Rahul Sharma (2024CS101)</strong>
+            <span style="font-size: 12px; color: #64748b;" th:text="${student.email}">rahul@college.edu</span>
+        </div>
+
+        <!-- Session Error Message (Not Found or Closed) -->
+        <div th:if="${sessionError}" class="alert alert-error" th:text="${sessionError}">
+            This attendance session has ended.
+        </div>
+
+        <!-- Feedback Messages (Success or Duplicate) -->
+        <div th:if="${message}" 
+             class="alert" 
+             th:classappend="${isError} ? 'alert-warning' : 'alert-success'" 
+             th:text="${message}">
+            Attendance marked successfully!
+        </div>
+
+        <!-- Action Form: Only show if session exists, is active, no sessionError, and attendance not yet marked in this flow -->
+        <form th:if="${sessionError == null and message == null and attendanceSession != null and attendanceSession.active}" 
+              th:action="@{/attendance/{id}(id=${attendanceSession.id})}" 
+              method="post">
+            <button type="submit" class="btn">Mark Attendance</button>
+        </form>
+
+        <div class="actions">
+            <a th:href="@{/student}" class="btn btn-secondary">Go to Student Dashboard</a>
+        </div>
+
+        <div class="nav-links">
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" style="background: none; border: none; color: #ef4444; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline;">Logout</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - QR Attendance</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; padding: 24px; }
+        .navbar { max-width: 1000px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 16px 24px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .navbar-brand h1 { font-size: 20px; font-weight: 700; color: #0f172a; }
+        .navbar-brand p { font-size: 13px; color: #64748b; margin-top: 2px; }
+        .btn-logout { background-color: #ef4444; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+        .btn-logout:hover { background-color: #dc2626; }
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        .card { background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; font-weight: 500; }
+        .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .form-row { display: flex; gap: 12px; align-items: flex-end; }
+        .form-group { flex: 1; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        input[type="text"] { width: 100%; padding: 10px 14px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
+        input[type="text"]:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .btn { display: inline-block; padding: 10px 20px; font-size: 14px; font-weight: 600; color: #ffffff; background-color: #2563eb; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; text-decoration: none; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; }
+        .btn-danger { background-color: #ef4444; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-outline { background-color: transparent; color: #2563eb; border: 1px solid #2563eb; }
+        .btn-outline:hover { background-color: #eff6ff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+        th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; font-weight: 600; color: #475569; font-size: 13px; }
+        tr:hover { background-color: #f8fafc; }
+        .badge-active { display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+        .badge-closed { display: inline-block; background-color: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+        .action-cell { display: flex; gap: 8px; align-items: center; }
+        .created-banner { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+        .created-banner h3 { color: #1e40af; font-size: 15px; margin-bottom: 6px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">
+            <h1>Teacher Portal</h1>
+            <p th:if="${teacher}">Logged in as: <strong th:text="${teacher.name}">Prof. Sharma</strong> (<span th:text="${teacher.email}">teacher@college.edu</span>)</p>
+        </div>
+        <form th:action="@{/logout}" method="post" style="margin: 0;">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <!-- Messages -->
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Created Session Quick Banner -->
+        <div class="created-banner" th:if="${createdSession}">
+            <h3>Lecture Created: <span th:text="${createdSession.sessionName}">Java Programming</span></h3>
+            <p style="font-size: 13px; color: #3b82f6; margin-bottom: 12px;">Session ID: #<span th:text="${createdSession.id}"></span> | Status: Active</p>
+            <div style="display: flex; gap: 10px;">
+                <a th:href="@{/qr/{id}(id=${createdSession.id})}" class="btn btn-sm">Show QR Code</a>
+                <a th:href="@{/teacher/session/{id}/attendance(id=${createdSession.id})}" class="btn btn-sm btn-outline">View Attendance</a>
+            </div>
+        </div>
+
+        <!-- Start Lecture Form -->
+        <div class="card">
+            <h2>Start New Lecture / Session</h2>
+            <form th:action="@{/teacher}" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sessionName">Lecture / Subject Name</label>
+                        <input type="text" id="sessionName" name="sessionName" placeholder="e.g. CS301 - Database Systems" required autofocus>
+                    </div>
+                    <button type="submit" class="btn">Start Lecture</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Existing Sessions List -->
+        <div class="card">
+            <h2>Attendance Sessions</h2>
+            <div th:if="${sessions == null or #lists.isEmpty(sessions)}" style="color: #64748b; font-size: 14px; text-align: center; padding: 20px 0;">
+                No attendance sessions created yet. Start a new lecture above!
+            </div>
+
+            <table th:if="${sessions != null and not #lists.isEmpty(sessions)}">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Lecture Name</th>
+                        <th>Start Time</th>
+                        <th>Status</th>
+                        <th>Present</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sess : ${sessions}">
+                        <td th:text="'#' + ${sess.id}">#1</td>
+                        <td><strong th:text="${sess.sessionName}">Java Programming</strong></td>
+                        <td th:text="${#temporals.format(sess.startTime, 'dd MMM yyyy, hh:mm a')}">05 Oct, 09:30 AM</td>
+                        <td>
+                            <span th:if="${sess.active}" class="badge-active">Active</span>
+                            <span th:if="${!sess.active}" class="badge-closed">Closed</span>
+                        </td>
+                        <td>
+                            <strong th:text="${attendanceCounts != null and attendanceCounts[sess.id] != null ? attendanceCounts[sess.id] : 0}">0</strong>
+                        </td>
+                        <td>
+                            <div class="action-cell">
+                                <a th:if="${sess.active}" th:href="@{/qr/{id}(id=${sess.id})}" class="btn btn-sm">QR Code</a>
+                                <a th:href="@{/teacher/session/{id}/attendance(id=${sess.id})}" class="btn btn-sm btn-outline">Attendance</a>
+                                <form th:if="${sess.active}" th:action="@{/teacher/session/{id}/close(id=${sess.id})}" method="post" style="display:inline; margin: 0;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to close this attendance session?');">Close</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
